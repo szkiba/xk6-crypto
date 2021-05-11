@@ -22,12 +22,12 @@
 
 package crypto
 
-import (
+import ( // nolint:gci
 	"context"
 	"crypto/ed25519"
-	"crypto/md5"
+	"crypto/md5" // nolint
 	"crypto/rand"
-	"crypto/sha1"
+	"crypto/sha1" // nolint
 	"crypto/sha256"
 	"crypto/sha512"
 	"errors"
@@ -39,11 +39,10 @@ import (
 	"github.com/dop251/goja"
 	"github.com/loadimpact/k6/js/common"
 	"github.com/loadimpact/k6/js/modules"
-	"golang.org/x/crypto/hkdf"
-	"golang.org/x/crypto/pbkdf2"
-
 	ed25519X "github.com/oasisprotocol/ed25519"
 	x25519X "github.com/oasisprotocol/ed25519/extra/x25519"
+	"golang.org/x/crypto/hkdf"
+	"golang.org/x/crypto/pbkdf2"
 )
 
 // Register the extensions on module initialization.
@@ -68,9 +67,9 @@ type hashInfo struct {
 }
 
 var (
-	ErrInvalidHash    = errors.New("invalid hash")
-	ErrInvalidKeyLen  = errors.New("invalid keylen")
-	ErrInvalidKeyType = errors.New("invalid keytype")
+	ErrUnsupportedHash      = errors.New("unsupported hash")
+	ErrInvalidKeyLen        = errors.New("invalid keylen")
+	ErrUnsupportedAlgorithm = errors.New("unsupported algorithm")
 
 	hashes = map[string]hashInfo{
 		"md5":    {fn: md5.New, size: md5.Size},
@@ -80,6 +79,8 @@ var (
 		"sha512": {fn: sha512.New, size: sha512.Size},
 	}
 )
+
+const hkdfMaxFactor = 255
 
 func bytes(in interface{}) ([]byte, error) {
 	if in == nil || reflect.ValueOf(in).IsZero() {
@@ -97,11 +98,11 @@ func bytes(in interface{}) ([]byte, error) {
 func (c *Crypto) Hkdf(ctx context.Context, hash string, secretIn, saltIn, infoIn interface{}, keylen int) (interface{}, error) {
 	alg, ok := hashes[strings.ToLower(hash)]
 	if !ok {
-		return nil, fmt.Errorf("%w: %s", ErrInvalidHash, hash)
+		return nil, fmt.Errorf("%w: %s", ErrUnsupportedHash, hash)
 	}
 
-	if keylen <= 0 || keylen > alg.size*255 {
-		return nil, fmt.Errorf("%w: %d, allowed range 1..%d", ErrInvalidKeyLen, keylen, alg.size*255)
+	if keylen <= 0 || keylen > alg.size*hkdfMaxFactor {
+		return nil, fmt.Errorf("%w: %d, allowed range 1..%d", ErrInvalidKeyLen, keylen, alg.size*hkdfMaxFactor)
 	}
 
 	secret, err := bytes(secretIn)
@@ -133,7 +134,7 @@ func (c *Crypto) Hkdf(ctx context.Context, hash string, secretIn, saltIn, infoIn
 func (c *Crypto) Pbkdf2(ctx context.Context, passwordIn, saltIn interface{}, iter, keylen int, hash string) (interface{}, error) {
 	alg, ok := hashes[strings.ToLower(hash)]
 	if !ok {
-		return nil, fmt.Errorf("%w: %s", ErrInvalidHash, hash)
+		return nil, fmt.Errorf("%w: %s", ErrUnsupportedHash, hash)
 	}
 
 	if keylen <= 0 {
@@ -155,8 +156,8 @@ func (c *Crypto) Pbkdf2(ctx context.Context, passwordIn, saltIn interface{}, ite
 	return common.GetRuntime(ctx).NewArrayBuffer(b), nil
 }
 
-func (c *Crypto) GenerateKeyPair(ctx context.Context, keytype string, seedIn interface{}) (*KeyPair, error) {
-	kt := strings.ToLower(keytype)
+func (c *Crypto) GenerateKeyPair(ctx context.Context, algorithm string, seedIn interface{}) (*KeyPair, error) {
+	alg := strings.ToLower(algorithm)
 	rt := common.GetRuntime(ctx)
 
 	seed, err := bytes(seedIn)
@@ -164,11 +165,14 @@ func (c *Crypto) GenerateKeyPair(ctx context.Context, keytype string, seedIn int
 		return nil, err
 	}
 
-	if kt == "ed25519" {
-
+	if alg == "ed25519" {
 		if seed != nil {
 			priv := ed25519.NewKeyFromSeed(seed)
-			pub := priv.Public().(ed25519.PublicKey)
+			pub, ok := priv.Public().(ed25519.PublicKey)
+
+			if !ok {
+				return nil, ErrUnsupportedAlgorithm
+			}
 
 			return &KeyPair{PublicKey: rt.NewArrayBuffer(pub), PrivateKey: rt.NewArrayBuffer(priv)}, nil
 		}
@@ -181,14 +185,14 @@ func (c *Crypto) GenerateKeyPair(ctx context.Context, keytype string, seedIn int
 		return &KeyPair{PublicKey: rt.NewArrayBuffer(pub), PrivateKey: rt.NewArrayBuffer(priv)}, nil
 	}
 
-	return nil, fmt.Errorf("%w: %s", ErrInvalidKeyType, keytype)
+	return nil, fmt.Errorf("%w: %s", ErrUnsupportedAlgorithm, algorithm)
 }
 
-func (c *Crypto) Ecdh(ctx context.Context, keytype string, privateKey, publicKey goja.ArrayBuffer) (interface{}, error) {
-	kt := strings.ToLower(keytype)
+func (c *Crypto) Ecdh(ctx context.Context, algorithm string, privateKey, publicKey goja.ArrayBuffer) (interface{}, error) {
+	alg := strings.ToLower(algorithm)
 	rt := common.GetRuntime(ctx)
 
-	if kt == "ed25519" {
+	if alg == "ed25519" {
 		priv := ed25519.PrivateKey(privateKey.Bytes())
 		pub := ed25519.PublicKey(publicKey.Bytes())
 
@@ -200,7 +204,7 @@ func (c *Crypto) Ecdh(ctx context.Context, keytype string, privateKey, publicKey
 		return rt.NewArrayBuffer(b), nil
 	}
 
-	return nil, fmt.Errorf("%w: %s", ErrInvalidKeyType, keytype)
+	return nil, fmt.Errorf("%w: %s", ErrUnsupportedAlgorithm, algorithm)
 }
 
 func sharedSecretED(privateKey ed25519.PrivateKey, publicKey ed25519.PublicKey) ([]byte, error) {
