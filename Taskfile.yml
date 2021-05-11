@@ -48,7 +48,7 @@ tasks:
   test:
     deps: [build]
     cmds:
-      - ./k6 run --no-usage-report test.js
+      - ./k6 run --no-usage-report test/crypto.test.js
 
   npm:install:
     cmds:

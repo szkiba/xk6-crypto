@@ -93,13 +93,13 @@ interface KeyPair {
 }
 
 /**
- * Generates a new asymmetric key pair of the given type (`keytype`) or import exising private key from `seed`.
+ * Generates a new asymmetric key pair of the given algorithm (`algorithm`) or import exising private key from `seed`.
  *
- * @param keytype Key pair type, supported values: `ed25519`
+ * @param algorithm Key algorithm, supported values: `ed25519`
  * @param seed Seed value when importing private key
  * @returns The generated key pair (an object with `publicKey` and `privateKey` properties)
  */
-export declare function generateKeyPair(keytype: string, seed?: ByteArrayLike): KeyPair;
+export declare function generateKeyPair(algorithm: string, seed?: ByteArrayLike): KeyPair;
 
 /**
  * Elliptic-curve Diffie–Hellman (ECDH) implementation.
@@ -109,9 +109,9 @@ export declare function generateKeyPair(keytype: string, seed?: ByteArrayLike): 
  * This shared secret may be directly used as a key, or to derive another key.
  * The key, or the derived key, can then be used to encrypt subsequent communications using a symmetric-key cipher.
  *
- * @param keytype Key type, supported values: `ed25519`
+ * @param algorithm Key algorithm, supported values: `ed25519`
  * @param privateKey Alice's private key
  * @param publicKey Bob's public key
  * @returns The derived shared secret. The result will be same with Bob's private key and Alice's public key.
  */
-export declare function ecdh(keytype: string, privateKey: ArrayBuffer, publicKey: ArrayBuffer): ArrayBuffer;
+export declare function ecdh(algorithm: string, privateKey: ArrayBuffer, publicKey: ArrayBuffer): ArrayBuffer;

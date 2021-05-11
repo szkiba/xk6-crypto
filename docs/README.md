@@ -52,7 +52,7 @@ Array of numbers. The number range is from 0 to 255.
 
 ### ecdh
 
-▸ **ecdh**(`keytype`: *string*, `privateKey`: ArrayBuffer, `publicKey`: ArrayBuffer): ArrayBuffer
+▸ **ecdh**(`algorithm`: *string*, `privateKey`: ArrayBuffer, `publicKey`: ArrayBuffer): ArrayBuffer
 
 Elliptic-curve Diffie–Hellman (ECDH) implementation.
 
@@ -65,7 +65,7 @@ The key, or the derived key, can then be used to encrypt subsequent communicatio
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `keytype` | *string* | Key type, supported values: `ed25519` |
+| `algorithm` | *string* | Key algorithm, supported values: `ed25519` |
 | `privateKey` | ArrayBuffer | Alice's private key |
 | `publicKey` | ArrayBuffer | Bob's public key |
 
@@ -77,15 +77,15 @@ ___
 
 ### generateKeyPair
 
-▸ **generateKeyPair**(`keytype`: *string*, `seed?`: [*ByteArrayLike*](README.md#bytearraylike)): [*KeyPair*](interfaces/keypair.md)
+▸ **generateKeyPair**(`algorithm`: *string*, `seed?`: [*ByteArrayLike*](README.md#bytearraylike)): [*KeyPair*](interfaces/keypair.md)
 
-Generates a new asymmetric key pair of the given type (`keytype`) or import exising private key from `seed`.
+Generates a new asymmetric key pair of the given algorithm (`algorithm`) or import exising private key from `seed`.
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `keytype` | *string* | Key pair type, supported values: `ed25519` |
+| `algorithm` | *string* | Key algorithm, supported values: `ed25519` |
 | `seed?` | [*ByteArrayLike*](README.md#bytearraylike) | Seed value when importing private key |
 
 **Returns:** [*KeyPair*](interfaces/keypair.md)
