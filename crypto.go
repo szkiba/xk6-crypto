@@ -37,8 +37,8 @@ import ( // nolint:gci
 	"strings"
 
 	"github.com/dop251/goja"
-	"github.com/loadimpact/k6/js/common"
-	"github.com/loadimpact/k6/js/modules"
+	"go.k6.io/k6/js/common"
+	"go.k6.io/k6/js/modules"
 	ed25519X "github.com/oasisprotocol/ed25519"
 	x25519X "github.com/oasisprotocol/ed25519/extra/x25519"
 	"golang.org/x/crypto/hkdf"

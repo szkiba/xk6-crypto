@@ -2,7 +2,7 @@
 
 A k6 extension for using extended crypto functions, mostly from [golang.org/x/crypto](https://pkg.go.dev/golang.org/x/crypto).
 
-Built for [k6](https://github.com/loadimpact/k6) using [xk6](https://github.com/k6io/xk6).
+Built for [k6](https://go.k6.io/k6) using [xk6](https://github.com/k6io/xk6).
 
 ## Usage
 
@@ -36,12 +36,12 @@ To build a `k6` binary with this extension, first ensure you have the prerequisi
 
 Then:
 
-1. Download `xk6`:
+1. Install `xk6`:
   ```bash
-  $ go get -u github.com/k6io/xk6
+  $ go install github.com/k6io/xk6/cmd/xk6@latest
   ```
 
 2. Build the binary:
   ```bash
-  $ xk6 build --with github.com/szkiba/xk6-crypto
+  $ xk6 build --with github.com/szkiba/xk6-crypto@latest
   ```
