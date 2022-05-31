@@ -27,9 +27,12 @@ import ( // nolint:gci
 	"crypto/ed25519"
 	"crypto/md5" // nolint
 	"crypto/rand"
+	"crypto/rsa"
 	"crypto/sha1" // nolint
 	"crypto/sha256"
 	"crypto/sha512"
+	"crypto/x509"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"hash"
@@ -37,10 +40,10 @@ import ( // nolint:gci
 	"strings"
 
 	"github.com/dop251/goja"
-	"go.k6.io/k6/js/common"
-	"go.k6.io/k6/js/modules"
 	ed25519X "github.com/oasisprotocol/ed25519"
 	x25519X "github.com/oasisprotocol/ed25519/extra/x25519"
+	"go.k6.io/k6/js/common"
+	"go.k6.io/k6/js/modules"
 	"golang.org/x/crypto/hkdf"
 	"golang.org/x/crypto/pbkdf2"
 )
@@ -207,6 +210,25 @@ func (c *Crypto) Ecdh(ctx context.Context, algorithm string, privateKey, publicK
 	return nil, fmt.Errorf("%w: %s", ErrUnsupportedAlgorithm, algorithm)
 }
 
+func (c *Crypto) RSAPublicEncrypt(ctx context.Context, publicKey string, encryptData string) (string, error) {
+	b, err := base64.StdEncoding.DecodeString(publicKey)
+	encryptDataByte := []byte(encryptData)
+
+	if err != nil {
+		return "", fmt.Errorf("error in decode base64 public key string to pem string %s", publicKey)
+	}
+	publicKeyRSA, err := publicKeyFrom(b)
+	if err != nil {
+		return "", fmt.Errorf("error in convert base64 public key string to rsa.PublicKey %s", publicKey)
+	}
+	data, err := rsa.EncryptPKCS1v15(rand.Reader, publicKeyRSA, encryptDataByte)
+	if err != nil {
+		return "", fmt.Errorf("error in encrypt data %s", encryptData)
+	}
+
+	return string(data), nil
+}
+
 func sharedSecretED(privateKey ed25519.PrivateKey, publicKey ed25519.PublicKey) ([]byte, error) {
 	epriv := ed25519X.NewKeyFromSeed(privateKey.Seed())
 	epub := ed25519X.PublicKey(publicKey)
@@ -220,4 +242,16 @@ func sharedSecretED(privateKey ed25519.PrivateKey, publicKey ed25519.PublicKey) 
 	}
 
 	return b, nil
+}
+
+func publicKeyFrom(key []byte) (*rsa.PublicKey, error) {
+	pubInterface, err := x509.ParsePKIXPublicKey(key)
+	if err != nil {
+		return nil, err
+	}
+	pub, ok := pubInterface.(*rsa.PublicKey)
+	if !ok {
+		return nil, errors.New("invalid public key")
+	}
+	return pub, nil
 }

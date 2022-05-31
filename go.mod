@@ -1,4 +1,4 @@
-module github.com/szkiba/xk6-crypto
+module github.com/minhhoangvn/xk6-crypto
 
 go 1.16
 
@@ -8,3 +8,5 @@ require (
 	go.k6.io/k6 v0.32.0
 	golang.org/x/crypto v0.0.0-20210506145944-38f3c27a63bf
 )
+
+replace github.com/minhhoangvn/xk6-crypto => /Users/lap14198/workspace/xk6-crypto
