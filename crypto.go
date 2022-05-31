@@ -224,6 +224,7 @@ func (c *Crypto) RsaPublicEncrypt(ctx context.Context, publicKey string, encrypt
 	}
 
 	ciphertext, err := rsa.EncryptPKCS1v15(rand.Reader, publicKeyRSA, encryptDataByte)
+
 	if err != nil {
 		return "", fmt.Errorf("error in encrypt data %s", err)
 	}
