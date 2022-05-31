@@ -222,8 +222,7 @@ func (c *Crypto) RsaPublicEncrypt(ctx context.Context, publicKey string, encrypt
 	if err != nil {
 		return "", fmt.Errorf("error in convert base64 public key string to rsa.PublicKey %s", err)
 	}
-	//hash := sha256.New()
-	//ciphertext, err := rsa.EncryptOAEP(hash, rand.Reader, publicKeyRSA, encryptDataByte, nil)
+
 	ciphertext, err := rsa.EncryptPKCS1v15(rand.Reader, publicKeyRSA, encryptDataByte)
 	if err != nil {
 		return "", fmt.Errorf("error in encrypt data %s", err)
