@@ -1,4 +1,4 @@
-module github.com/minhhoangvn/xk6-crypto
+module github.com/szkiba/xk6-crypto
 
 go 1.16
 

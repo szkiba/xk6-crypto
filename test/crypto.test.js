@@ -24,7 +24,7 @@
 
 export { options } from "./expect.js";
 import { describe } from "./expect.js";
-import { hkdf, pbkdf2, generateKeyPair, ecdh } from "k6/x/crypto";
+import { hkdf, pbkdf2, generateKeyPair, ecdh, rsaPublicEncrypt} from "k6/x/crypto";
 
 export default function () {
   describe("hkdf", (t) => {
@@ -58,5 +58,11 @@ export default function () {
     t.expect(aliceShared.every((val, i) => val == bobShared[i]))
       .as("shared secrets equals")
       .toBeTruthy();
+  });
+
+  describe("rsaPublicEncrypt", (t) => {
+    const data = rsaPublicEncrypt("MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJo26jOpAMWZkXEQnyWWV54e5bkxBSH7OK+FbYUycxXG5NitcFkNv/QuEuSqwC8xy8rcUKaLOSwQpCz0o+l8vO8CAwEAAQ==", "122123")
+    console.log(data);
+    t.expect(32).as("public key length").toEqual(32);
   });
 }

@@ -33,6 +33,7 @@ import ( // nolint:gci
 	"crypto/sha512"
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"hash"
@@ -210,23 +211,25 @@ func (c *Crypto) Ecdh(ctx context.Context, algorithm string, privateKey, publicK
 	return nil, fmt.Errorf("%w: %s", ErrUnsupportedAlgorithm, algorithm)
 }
 
-func (c *Crypto) RSAPublicEncrypt(ctx context.Context, publicKey string, encryptData string) (string, error) {
+func (c *Crypto) RsaPublicEncrypt(ctx context.Context, publicKey string, encryptData string) (string, error) {
 	b, err := base64.StdEncoding.DecodeString(publicKey)
 	encryptDataByte := []byte(encryptData)
 
 	if err != nil {
-		return "", fmt.Errorf("error in decode base64 public key string to pem string %s", publicKey)
+		return "", fmt.Errorf("error in decode base64 public key string to pem string %s", err)
 	}
 	publicKeyRSA, err := publicKeyFrom(b)
 	if err != nil {
-		return "", fmt.Errorf("error in convert base64 public key string to rsa.PublicKey %s", publicKey)
+		return "", fmt.Errorf("error in convert base64 public key string to rsa.PublicKey %s", err)
 	}
-	data, err := rsa.EncryptPKCS1v15(rand.Reader, publicKeyRSA, encryptDataByte)
+	//hash := sha256.New()
+	//ciphertext, err := rsa.EncryptOAEP(hash, rand.Reader, publicKeyRSA, encryptDataByte, nil)
+	ciphertext, err := rsa.EncryptPKCS1v15(rand.Reader, publicKeyRSA, encryptDataByte)
 	if err != nil {
-		return "", fmt.Errorf("error in encrypt data %s", encryptData)
+		return "", fmt.Errorf("error in encrypt data %s", err)
 	}
 
-	return string(data), nil
+	return string(hex.EncodeToString(ciphertext)), nil
 }
 
 func sharedSecretED(privateKey ed25519.PrivateKey, publicKey ed25519.PublicKey) ([]byte, error) {
