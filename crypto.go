@@ -33,7 +33,6 @@ import ( // nolint:gci
 	"crypto/sha512"
 	"crypto/x509"
 	"encoding/base64"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"hash"
@@ -228,8 +227,7 @@ func (c *Crypto) RsaPublicEncrypt(ctx context.Context, publicKey string, encrypt
 	if err != nil {
 		return "", fmt.Errorf("error in encrypt data %s", err)
 	}
-
-	return string(hex.EncodeToString(ciphertext)), nil
+	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
 func sharedSecretED(privateKey ed25519.PrivateKey, publicKey ed25519.PublicKey) ([]byte, error) {
