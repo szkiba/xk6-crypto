@@ -210,7 +210,7 @@ func (c *Crypto) Ecdh(ctx context.Context, algorithm string, privateKey, publicK
 	return nil, fmt.Errorf("%w: %s", ErrUnsupportedAlgorithm, algorithm)
 }
 
-func (c *Crypto) RsaPublicEncrypt(ctx context.Context, publicKey string, encryptData string) (string, error) {
+func (c *Crypto) RsaPublicEncryptWithBase64PublicKey(ctx context.Context, publicKey string, encryptData string) (string, error) {
 	b, err := base64.StdEncoding.DecodeString(publicKey)
 	encryptDataByte := []byte(encryptData)
 

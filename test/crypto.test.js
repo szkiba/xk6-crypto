@@ -24,7 +24,7 @@
 
 export { options } from "./expect.js";
 import { describe } from "./expect.js";
-import { hkdf, pbkdf2, generateKeyPair, ecdh, rsaPublicEncrypt} from "k6/x/crypto";
+import { hkdf, pbkdf2, generateKeyPair, ecdh, rsaPublicEncryptWithBase64PublicKey} from "k6/x/crypto";
 
 export default function () {
   describe("hkdf", (t) => {
@@ -60,9 +60,8 @@ export default function () {
       .toBeTruthy();
   });
 
-  describe("rsaPublicEncrypt", (t) => {
-    const data = rsaPublicEncrypt("MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJo26jOpAMWZkXEQnyWWV54e5bkxBSH7OK+FbYUycxXG5NitcFkNv/QuEuSqwC8xy8rcUKaLOSwQpCz0o+l8vO8CAwEAAQ==", "122123")
-    console.log(data);
-    t.expect(32).as("public key length").toEqual(32);
+  describe("rsaPublicEncryptWithBase64PublicKey", (t) => {
+    const data = rsaPublicEncryptWithBase64PublicKey("MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJo26jOpAMWZkXEQnyWWV54e5bkxBSH7OK+FbYUycxXG5NitcFkNv/QuEuSqwC8xy8rcUKaLOSwQpCz0o+l8vO8CAwEAAQ==", "YJGWOWQ4YMYTOTKYZC0ZODAWLWJKZTGTMDDMZTA4NJY0N2Y0")
+    t.expect(data.length).as("public key length").toBeGreaterThan(32);
   });
 }
