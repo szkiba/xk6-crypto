@@ -23,7 +23,7 @@
 package crypto
 
 import ( // nolint:gci
-	"context"
+
 	"crypto/ed25519"
 	"crypto/md5" // nolint
 	"crypto/rand"
@@ -37,10 +37,10 @@ import ( // nolint:gci
 	"strings"
 
 	"github.com/dop251/goja"
-	"go.k6.io/k6/js/common"
-	"go.k6.io/k6/js/modules"
 	ed25519X "github.com/oasisprotocol/ed25519"
 	x25519X "github.com/oasisprotocol/ed25519/extra/x25519"
+	"go.k6.io/k6/js/common"
+	"go.k6.io/k6/js/modules"
 	"golang.org/x/crypto/hkdf"
 	"golang.org/x/crypto/pbkdf2"
 )
@@ -55,10 +55,14 @@ type KeyPair struct {
 	PublicKey  goja.ArrayBuffer `js:"publicKey"`
 }
 
-type Crypto struct{}
+type Crypto struct {
+	vu modules.VU
+}
 
-func New() *Crypto {
-	return &Crypto{}
+func newCrypto(vu modules.VU) *Crypto {
+	return &Crypto{
+		vu: vu,
+	}
 }
 
 type hashInfo struct {
@@ -95,7 +99,7 @@ func bytes(in interface{}) ([]byte, error) {
 	return val, nil
 }
 
-func (c *Crypto) Hkdf(ctx context.Context, hash string, secretIn, saltIn, infoIn interface{}, keylen int) (interface{}, error) {
+func (c *Crypto) Hkdf(hash string, secretIn, saltIn, infoIn interface{}, keylen int) (interface{}, error) {
 	alg, ok := hashes[strings.ToLower(hash)]
 	if !ok {
 		return nil, fmt.Errorf("%w: %s", ErrUnsupportedHash, hash)
@@ -128,10 +132,10 @@ func (c *Crypto) Hkdf(ctx context.Context, hash string, secretIn, saltIn, infoIn
 		return nil, err
 	}
 
-	return common.GetRuntime(ctx).NewArrayBuffer(b), nil
+	return c.vu.Runtime().NewArrayBuffer(b), nil
 }
 
-func (c *Crypto) Pbkdf2(ctx context.Context, passwordIn, saltIn interface{}, iter, keylen int, hash string) (interface{}, error) {
+func (c *Crypto) Pbkdf2(passwordIn, saltIn interface{}, iter, keylen int, hash string) (interface{}, error) {
 	alg, ok := hashes[strings.ToLower(hash)]
 	if !ok {
 		return nil, fmt.Errorf("%w: %s", ErrUnsupportedHash, hash)
@@ -153,12 +157,12 @@ func (c *Crypto) Pbkdf2(ctx context.Context, passwordIn, saltIn interface{}, ite
 
 	b := pbkdf2.Key(password, salt, iter, keylen, alg.fn)
 
-	return common.GetRuntime(ctx).NewArrayBuffer(b), nil
+	return c.vu.Runtime().NewArrayBuffer(b), nil
 }
 
-func (c *Crypto) GenerateKeyPair(ctx context.Context, algorithm string, seedIn interface{}) (*KeyPair, error) {
+func (c *Crypto) GenerateKeyPair(algorithm string, seedIn interface{}) (*KeyPair, error) {
 	alg := strings.ToLower(algorithm)
-	rt := common.GetRuntime(ctx)
+	rt := c.vu.Runtime()
 
 	seed, err := bytes(seedIn)
 	if err != nil {
@@ -188,9 +192,9 @@ func (c *Crypto) GenerateKeyPair(ctx context.Context, algorithm string, seedIn i
 	return nil, fmt.Errorf("%w: %s", ErrUnsupportedAlgorithm, algorithm)
 }
 
-func (c *Crypto) Ecdh(ctx context.Context, algorithm string, privateKey, publicKey goja.ArrayBuffer) (interface{}, error) {
+func (c *Crypto) Ecdh(algorithm string, privateKey, publicKey goja.ArrayBuffer) (interface{}, error) {
 	alg := strings.ToLower(algorithm)
-	rt := common.GetRuntime(ctx)
+	rt := c.vu.Runtime()
 
 	if alg == "ed25519" {
 		priv := ed25519.PrivateKey(privateKey.Bytes())
