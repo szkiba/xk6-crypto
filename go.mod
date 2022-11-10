@@ -6,7 +6,7 @@ require (
 	github.com/dop251/goja v0.0.0-20221106173738-3b8a68ca89b4
 	github.com/oasisprotocol/ed25519 v0.0.0-20210505154701-76d8c688d86e
 	go.k6.io/k6 v0.41.0
-	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be
+	golang.org/x/crypto v0.2.0
 )
 
 require (

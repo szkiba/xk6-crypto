@@ -45,14 +45,9 @@ import ( // nolint:gci
 	"golang.org/x/crypto/pbkdf2"
 )
 
-// Register the extensions on module initialization.
-func init() {
-	modules.Register("k6/x/crypto", New())
-}
-
 type KeyPair struct {
-	PrivateKey goja.ArrayBuffer `js:"privateKey"`
-	PublicKey  goja.ArrayBuffer `js:"publicKey"`
+	PrivateKey interface{} `js:"privateKey"`
+	PublicKey  interface{} `js:"publicKey"`
 }
 
 type Crypto struct {
