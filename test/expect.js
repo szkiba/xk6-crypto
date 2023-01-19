@@ -114,6 +114,29 @@ class Funk {
     return this;
   }
 
+  toNotEqual(rhv) {
+    if (this._brokenChainCheck()) return this;
+    this.rightHandValue = rhv;
+
+    let checkName = `${this.leftHandValue} is ${this.rightHandValue}`;
+
+    let checkIsSuccessful = this.leftHandValue !== this.rightHandValue;
+
+    if (this.leftHandValueName) {
+      checkName = `${this.leftHandValueName} is ${this.leftHandValue}.`;
+
+      if (!checkIsSuccessful) {
+        checkName += ` Expected '${this.rightHandValue}'`;
+      }
+    }
+
+    this._recordCheck(checkName, checkIsSuccessful, this.rightHandValue);
+
+    if (!checkIsSuccessful) this._breakTheChain();
+
+    return this;
+  }
+
   toBeGreaterThan(rhv) {
     if (this._brokenChainCheck()) return this;
 
@@ -181,7 +204,7 @@ class Funk {
 
     let checkName = `${this.leftHandValueName || this.leftHandValue} is truthy.`;
 
-    let checkIsSuccessful = this.leftHandValue ? true : false;
+    let checkIsSuccessful = !!this.leftHandValue;
 
     this._recordCheck(checkName, checkIsSuccessful, this.leftHandValue);
 
