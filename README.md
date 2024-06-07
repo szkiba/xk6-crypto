@@ -1,5 +1,10 @@
 # xk6-crypto
 
+> [!WARNING]
+> This extension is deprecated. In the meantime, [k6 supports webcrypto](https://grafana.com/docs/k6/latest/javascript-api/k6-experimental/webcrypto/), it is advisable to use it in new tests.
+> If you need this extension because of your old tests or if you want to continue development, feel free to fork it.
+
+
 A k6 extension for using extended crypto functions, mostly from [golang.org/x/crypto](https://pkg.go.dev/golang.org/x/crypto).
 
 Built for [k6](https://go.k6.io/k6) using [xk6](https://github.com/grafana/xk6).
